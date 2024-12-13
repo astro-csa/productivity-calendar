@@ -17,7 +17,7 @@ class Task:
         self.completed = True
 
     def __str__(self):
-        status = "✔" if self.completed else "x"
+        status = "✓" if self.completed else "x"
         return f"{self.description}[{status}]"
     
 class Day:
