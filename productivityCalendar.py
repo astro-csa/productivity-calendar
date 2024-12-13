@@ -1,4 +1,3 @@
-import datetime
 import json
 import os
 from pathlib import Path
@@ -26,9 +25,21 @@ class Day:
         self.date = date
         self.tasks = []
 
-    def add_task(self,description):
+    def add_task(self, description):
         task = Task(description)
         self.tasks.append(task)
+
+    def delete_task(self, task_no):
+        if task_no < 0 or task_no > len(self.tasks):
+            print("There is no task matching the description.")
+        else:
+            del self.tasks[task_no - 1]
+    
+    def complete_task(self, task_no):
+        if task_no < 0 or task_no > len(self.tasks):
+            print("There is no task matching the description.")
+        else:
+            self.tasks[task_no - 1].complete()
 
     def list_tasks(self):
         if not self.tasks:
@@ -36,12 +47,6 @@ class Day:
         else:
             for i, task in enumerate(self.tasks,start=1):
                 print(f"{i}) {task}")
-    
-    def complete_task(self, task_no):
-        if task_no < 0 or task_no > len(self.tasks):
-            print("There is no task matching the description.")
-        else:
-            self.tasks[task_no - 1].complete()
         
 
 class Calendar:
@@ -50,30 +55,67 @@ class Calendar:
         self.calendar_path = subdir_path / f"{self.name}.json"
         self.days = {}
     
+    @staticmethod
+    def formatted_today():
+        """
+        Return today's date as a formatted string (dd/mm/yyyy).
+        """
+        import datetime
+        today = datetime.date.today()
+        return today.strftime("%d/%m/%Y")
+    
+    @staticmethod
+    def formatted_tomorrow():
+        """
+        Return tomorrow's date as a formatted string (dd/mm/yyyy).
+        """
+        import datetime
+        tomorrow = datetime.date.today() + datetime.timedelta(days=1)
+        return tomorrow.strftime("%d/%m/%Y")
+    
+    @staticmethod
+    def formatted_yesterday():
+        """
+        Return yesterday's date as a formatted string (dd/mm/yyyy).
+        """
+        import datetime
+        yesterday = datetime.date.today() + datetime.timedelta(days=-1)
+        return yesterday.strftime("%d/%m/%Y")
+    
     def add_task(self, date, description):
-        # Adds 'Today'. 'Tomorrow' and 'Yesterday' keywords.
+        # Add 'Today'. 'Tomorrow' and 'Yesterday' keywords.
         if date.lower() == "today":
-            today = datetime.date.today()
-            date = today.strftime("%d/%m/%Y")
+            date = self.formatted_today()
         elif date.lower() == "tomorrow":
-            today = datetime.date.today()
-            tomorrow = today + datetime.timedelta(days=1)
-            date = tomorrow.strftime("%d/%m/%Y")
+            date = self.formatted_tomorrow()
         elif date.lower() == "yesterday":
-            today = datetime.date.today()
-            yesterday = today + datetime.timedelta(days=-1)
-            date = yesterday.strftime("%d/%m/%Y")
+            date = self.formatted_yesterday()
         
         if date not in self.days:
             self.days[date] = Day(date)
         self.days[date].add_task(description)
+
+    def delete_task(self, date, task):
+        # Add 'Today'. 'Tomorrow' and 'Yesterday' keywords.
+        if date.lower() == "today":
+            date = self.formatted_today()
+        elif date.lower() == "tomorrow":
+            date = self.formatted_tomorrow()
+        elif date.lower() == "yesterday":
+            date = self.formatted_yesterday()
+
+        if date not in self.days:
+            print("There is no task for this date.")
+        else:
+            self.days[date].delete_task(task_no)
+            print("Task deleted successfully.")
+        
     
     def complete_task(self, date, task_no):
         if date not in self.days:
             print("There is no task for this date.")
         else:
             self.days[date].complete_task(task_no)
-            print("Task completed successfully.")
             
     def list_all_tasks(self):
         if not self.days:
@@ -92,14 +134,15 @@ class Calendar:
                 match choice:
                     case "1":
                         self.load_calendar()
-                        return
+                        return True
                     case "2":
                         self.save_calendar()
-                        return
+                        return False
                     case _:
                         print("Option not valid, try again")
         else: 
             self.save_calendar()
+            return False
 
     def save_calendar(self):
         data = {}
@@ -177,16 +220,16 @@ while True:
             calendar = Calendar('calendar')
             calendar.list_all_calendars()
         case "2":
-            calendar_name = input("\nName of the calendar you want to create: ") 
+            calendar_name = input("Name of the calendar you want to create: ") 
             calendar_name = Calendar(calendar_name)
-            calendar_name.create_calendar()
+            flag = calendar_name.create_calendar()
         case "3":
-            calendar_name = input("\nName of the calendar you want to open: ")
+            calendar_name = input("Name of the calendar you want to open: ")
             calendar_name = Calendar(calendar_name)
             calendar_name.load_calendar()
             flag = True
         case "4":
-            calendar_name = input("\nName of the calendar you want to delete: ")
+            calendar_name = input("Name of the calendar you want to delete: ")
             calendar_name = Calendar(calendar_name)
             calendar_name.delete_calendar()
         case "5":
@@ -196,7 +239,7 @@ while True:
             print("Option not valid, try again.")
 
     while flag:
-        print("\nChoose an option:\n1. See all tasks.\n2. Create a task.\n3. Complete a task.\n4. Save and return to calendar choice.")
+        print("\nChoose an option:\n1. See all tasks.\n2. Create a task.\n3. Complete a task.\n4. Delete a task.\n5. Save and return to calendar choice.")
         choice = input("\nYour choice: ")
         match choice:
             case "1":
@@ -211,6 +254,11 @@ while True:
                 task_no = int(input("Select task number: "))
                 calendar_name.complete_task(date, task_no - 1)
             case "4":
+                calendar_name.list_all_tasks()
+                date = input("\nSelect a date: ")
+                task_no = int(input("Select task number: "))
+                calendar_name.delete_task(date, task_no - 1)
+            case "5":
                 calendar_name.save_calendar()
                 break
             case _:
