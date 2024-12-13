@@ -1,3 +1,4 @@
+import datetime
 import json
 import os
 from pathlib import Path
@@ -50,6 +51,19 @@ class Calendar:
         self.days = {}
     
     def add_task(self, date, description):
+        # Adds 'Today'. 'Tomorrow' and 'Yesterday' keywords.
+        if date.lower() == "today":
+            today = datetime.date.today()
+            date = today.strftime("%d/%m/%Y")
+        elif date.lower() == "tomorrow":
+            today = datetime.date.today()
+            tomorrow = today + datetime.timedelta(days=1)
+            date = tomorrow.strftime("%d/%m/%Y")
+        elif date.lower() == "yesterday":
+            today = datetime.date.today()
+            yesterday = today + datetime.timedelta(days=-1)
+            date = yesterday.strftime("%d/%m/%Y")
+        
         if date not in self.days:
             self.days[date] = Day(date)
         self.days[date].add_task(description)
