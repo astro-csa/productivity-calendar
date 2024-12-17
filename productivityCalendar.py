@@ -1,3 +1,4 @@
+import datetime
 import json
 import os
 from pathlib import Path
@@ -92,13 +93,31 @@ class Calendar:
             self.days[date].delete_task(task_no)
             print("Task deleted successfully.")
         
-    
     def complete_task(self, date, task_no):
         if date not in self.days:
             print("There is no task for this date.")
         else:
             self.days[date].complete_task(task_no)
             
+    def list_week_tasks(self):
+        today = datetime.date.today()
+        monday = today - datetime.timedelta(days=today.weekday())
+        current_week=[]
+        for i in range(7):
+            day = monday + datetime.timedelta(days=i)
+            current_week.append(day.strftime("%d/%m/%Y"))
+        weekdays = ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"]
+        for date, day in sorted(self.days.items()):
+            if date == self.shiftted_day(0):
+                print(f"\n{weekdays[datetime.datetime.strptime(date,"%d/%m/%Y").weekday()]} {date} (Today)")
+                flag = True
+            elif date != today and date in current_week:
+                print(f"\n{weekdays[datetime.datetime.strptime(date,"%d/%m/%Y").weekday()]} {date}")
+                flag = True
+            day.list_tasks()
+        if not flag:
+            print("There are no tasks for the current week.")
+    
     def list_all_tasks(self):
         if not self.days:
             print("There are not tasks in the calendar.")
@@ -221,26 +240,28 @@ while True:
             print("Option not valid, try again.")
 
     while flag:
-        print("\nChoose an option:\n1. See all tasks.\n2. Create a task.\n3. Complete a task.\n4. Delete a task.\n5. Save and return to calendar choice.")
+        print("\nChoose an option:\n1. See current week calendar.\n2. See all tasks.\n3. Create a task.\n4. Complete a task.\n5. Delete a task.\n6. Save and return to calendar choice.")
         choice = input("\nYour choice: ")
         match choice:
             case "1":
-                calendar_name.list_all_tasks()
+                calendar_name.list_week_tasks()
             case "2":
+                calendar_name.list_all_tasks()
+            case "3":
                 date = input("\nSelect the date: ")
                 description = input("Task description: ")
                 calendar_name.add_task(date, description)
-            case "3":
-                calendar_name.list_all_tasks()
-                date = input("\nSelect a date: ")
-                task_no = int(input("Select task number: "))
-                calendar_name.complete_task(date, task_no - 1)
             case "4":
                 calendar_name.list_all_tasks()
                 date = input("\nSelect a date: ")
                 task_no = int(input("Select task number: "))
-                calendar_name.delete_task(date, task_no - 1)
+                calendar_name.complete_task(date, task_no - 1)
             case "5":
+                calendar_name.list_all_tasks()
+                date = input("\nSelect a date: ")
+                task_no = int(input("Select task number: "))
+                calendar_name.delete_task(date, task_no - 1)
+            case "6":
                 calendar_name.save_calendar()
                 break
             case _:
