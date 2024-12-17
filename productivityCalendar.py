@@ -56,40 +56,22 @@ class Calendar:
         self.days = {}
     
     @staticmethod
-    def formatted_today():
+    def shiftted_day(shift=0):
         """
-        Return today's date as a formatted string (dd/mm/yyyy).
-        """
-        import datetime
-        today = datetime.date.today()
-        return today.strftime("%d/%m/%Y")
-    
-    @staticmethod
-    def formatted_tomorrow():
-        """
-        Return tomorrow's date as a formatted string (dd/mm/yyyy).
+        Return today's date shifted the amount shift as a formatted string (dd/mm/yyyy).
         """
         import datetime
-        tomorrow = datetime.date.today() + datetime.timedelta(days=1)
-        return tomorrow.strftime("%d/%m/%Y")
-    
-    @staticmethod
-    def formatted_yesterday():
-        """
-        Return yesterday's date as a formatted string (dd/mm/yyyy).
-        """
-        import datetime
-        yesterday = datetime.date.today() + datetime.timedelta(days=-1)
-        return yesterday.strftime("%d/%m/%Y")
+        day = datetime.date.today() + datetime.timedelta(days=shift)
+        return day.strftime("%d/%m/%Y")
     
     def add_task(self, date, description):
         # Add 'Today'. 'Tomorrow' and 'Yesterday' keywords.
         if date.lower() == "today":
-            date = self.formatted_today()
+            date = self.shiftted_day()
         elif date.lower() == "tomorrow":
-            date = self.formatted_tomorrow()
+            date = self.shiftted_day(1)
         elif date.lower() == "yesterday":
-            date = self.formatted_yesterday()
+            date = self.shiftted_day(-1)
         
         if date not in self.days:
             self.days[date] = Day(date)
@@ -98,11 +80,11 @@ class Calendar:
     def delete_task(self, date, task):
         # Add 'Today'. 'Tomorrow' and 'Yesterday' keywords.
         if date.lower() == "today":
-            date = self.formatted_today()
+            date = self.shiftted_day()
         elif date.lower() == "tomorrow":
-            date = self.formatted_tomorrow()
+            date = self.shiftted_day(1)
         elif date.lower() == "yesterday":
-            date = self.formatted_yesterday()
+            date = self.shiftted_day(-1)
 
         if date not in self.days:
             print("There is no task for this date.")
