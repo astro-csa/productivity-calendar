@@ -1,1 +1,4 @@
-calendars/
+__pycache__/
+.vscode/
+data/
+tests/
