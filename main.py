@@ -1,6 +1,7 @@
 from calendar_classes import Calendar
 
 def main():
+    calendar_obj = None
     print("=== PRODUCTIVITY CALENDAR ===")
     while True:
         print("\nChoose an option:\n1. See existing calendars.\n2. Create a new calendar.\n3. Open an existing calendar.\n4. Delete an existing calendar.\n5. Stop program.")
@@ -53,7 +54,7 @@ def main():
                     calendar_obj.delete_task(date, task_no - 1)
                 case "6":
                     calendar_obj.save_calendar()
-                    break
+                    calendar_obj = None
                 case _:
                     print("Option not valid, try again.")
 

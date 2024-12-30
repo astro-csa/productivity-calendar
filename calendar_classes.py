@@ -85,6 +85,8 @@ class Calendar:
     @classmethod
     def create_calendar(cls, calendar):
         """Creates a new calendar or loads an existing one."""
+        if not calendars_dir.exists():
+            calendars_dir.mkdir()
         calendar_path = calendars_dir / calendar
         if calendar_path.exists():
             print("There is an existing calendar with that name, what would you like to do?\n1. Load it.\n2. Overwrite it.")
@@ -92,19 +94,16 @@ class Calendar:
                 choice = input("Your choice: ")
                 match choice:
                     case "1":
-                        Calendar.load_calendar(calendar)
-                        return True
+                        return Calendar.load_calendar(calendar)
                     case "2":
                         shutil.rmtree(calendar_path)
                         break
                     case _:
                         print("Option not valid, try again")
-        else:
-            calendar_path.mkdir()
-            with open(calendar_path / "calendar.json", "w") as file: # Creates an empty file
-                pass
-            print(f"Calendar {calendar} succesfully created.")
-            return False
+        calendar_path.mkdir()
+        with open(calendar_path / "calendar.json", "w") as file: # Creates an empty file
+            pass
+        print(f"Calendar '{calendar}' succesfully created.")
 
     @classmethod
     def load_calendar(cls, calendar):
@@ -115,7 +114,7 @@ class Calendar:
                 choice = input("There is no existing calendar with that name, would you like to create one? (y/n) ")
                 match choice:
                     case "y":
-                        Calendar.create_calendar()
+                        Calendar.create_calendar(calendar)
                         return
                     case "n":
                         return
@@ -163,20 +162,23 @@ class Calendar:
     @classmethod
     def list_all_calendars(cls):
         """Lists all calendar files in the subdirectory."""
-        data = list(calendars_dir.iterdir())
-        if data:
-            print("Calendars available:\n")
-            for calendar_file in data:
-                print(calendar_file.name)
-        else:
-            print("No calendars found.\n")
+        try:
+            data = list(calendars_dir.iterdir())
+            if data:
+                print("Calendars available:\n")
+                for calendar_file in data:
+                    print(calendar_file.name)
+            else:
+                print("No calendars found.\n")
+        except FileNotFoundError:
+            print("There are no calendars and 'data' directory is not created.\n")
 
     def save_calendar(self):
         """Saves the calendar to a JSON file."""
         try:
             with open(self.calendar_path / "recurrency.json", "w") as file:
                 json.dump(self.recurrent_tasks, file, indent=4)
-            print("Calendar saved successfully.")
+            print("Recurrency saved successfully.")
         except:
             print("An error occurred while saving the calendar."),
         
@@ -220,11 +222,15 @@ class Calendar:
             date = self.shiftted_day(1)
         elif date.lower() == "yesterday":
             date = self.shiftted_day(-1)
+
         if date not in self.days:
             print("There are no tasks for this date.")
         else:
             self.days[date].delete_task(task_no)
             print("Task deleted successfully.")
+            # Deletes empty days
+            if not self.days[date].tasks:
+                del self.days[date]
 
     def complete_task(self, date, task_no):
         """Marks a task as completed for a specified date in the calendar."""
